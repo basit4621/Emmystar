@@ -46,7 +46,7 @@ function ProductDetail() {
   return (
     <SiteChrome settings={storeSettings}>
       <div className="mx-auto w-full max-w-6xl px-4 py-10">
-        <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">
+        <Link to="/" search={{ category: undefined }} className="text-sm text-muted-foreground hover:text-foreground">
           ← Back to shop
         </Link>
 

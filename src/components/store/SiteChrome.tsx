@@ -21,7 +21,7 @@ export function SiteChrome({ settings, children }: { settings: Settings; childre
     <div className="flex min-h-screen flex-col bg-background">
       <header className="sticky top-0 z-30 border-b border-border bg-card">
         <div className="mx-auto flex h-16 w-full max-w-6xl items-center gap-6 px-4">
-          <Link to="/" className="flex items-center gap-2">
+          <Link to="/" search={{ category: undefined }} className="flex items-center gap-2">
             <StarLogo className="h-6 w-6 text-accent" />
             <span className="font-display text-lg font-bold">{settings.store_name}</span>
           </Link>

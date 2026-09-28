@@ -137,7 +137,7 @@ function LoginCard() {
         >
           Create owner account
         </button>
-        <Link to="/" className="mt-4 block text-center text-sm text-muted-foreground">
+        <Link to="/" search={{ category: undefined }} className="mt-4 block text-center text-sm text-muted-foreground">
           Back to shop
         </Link>
       </form>
@@ -234,7 +234,7 @@ function Dashboard() {
         <div className="mx-auto flex w-full max-w-5xl items-center gap-4 px-4 py-4">
           <StarLogo className="h-5 w-5 text-accent" />
           <span className="font-display text-base font-bold">Emmy Star admin</span>
-          <Link to="/" className="ml-auto text-sm text-muted-foreground">
+          <Link to="/" search={{ category: undefined }} className="ml-auto text-sm text-muted-foreground">
             View shop
           </Link>
           <button
