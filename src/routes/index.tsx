@@ -14,11 +14,11 @@ import catSamsung from "@/assets/cat-samsung.jpg";
 import catLaptops from "@/assets/cat-laptops.jpg";
 import trustStore from "@/assets/trust-store.jpg";
 
-type HomeSearch = { category?: string };
+type HomeSearch = { category: string | undefined };
 
 export const Route = createFileRoute("/")({
   validateSearch: (search: Record<string, unknown>): HomeSearch => ({
-    category: typeof search.category === "string" ? search.category : undefined,
+    category: typeof search["category"] === "string" ? (search["category"] as string) : undefined,
   }),
   head: () => ({
     meta: [

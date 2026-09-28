@@ -31,7 +31,7 @@ export const Route = createFileRoute("/admin")({
 const EMPTY_FORM = {
   id: "",
   name: "",
-  category: CATEGORIES[0],
+  category: "iPhones",
   price: "",
   stock: "",
   description: "",
@@ -482,7 +482,7 @@ function Field({
   );
 }
 
-function SettingsForm({ settings }: { settings?: Settings }) {
+function SettingsForm({ settings }: { settings: Settings | undefined }) {
   const queryClient = useQueryClient();
   const [form, setForm] = useState<Settings | null>(settings ?? null);
   const [saving, setSaving] = useState(false);
