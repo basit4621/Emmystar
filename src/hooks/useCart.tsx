@@ -5,6 +5,7 @@ export type CartItem = {
   name: string;
   price: number;
   image_url: string | null;
+  stock: number;
   quantity: number;
 };
 
@@ -14,7 +15,7 @@ type CartContextValue = {
   total: number;
   open: boolean;
   setOpen: (open: boolean) => void;
-  add: (item: Omit<CartItem, "quantity">, quantity?: number) => void;
+  add: (item: Omit<CartItem, "quantity">, quantity?: number) => number;
   setQuantity: (id: string, quantity: number) => void;
   remove: (id: string) => void;
   clear: () => void;
@@ -31,7 +32,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setItems(JSON.parse(raw) as CartItem[]);
+      if (raw) {
+        const saved = JSON.parse(raw) as CartItem[];
+        setItems(
+          saved.map((item) => ({
+            ...item,
+            stock: Number.isFinite(item.stock) ? item.stock : item.quantity,
+          })),
+        );
+      }
     } catch {
       /* ignore malformed storage */
     }
@@ -52,21 +61,38 @@ export function CartProvider({ children }: { children: ReactNode }) {
       total,
       open,
       setOpen,
-      add: (item, quantity = 1) =>
+      add: (item, quantity = 1) => {
+        const existing = items.find((entry) => entry.id === item.id);
+        const accepted = Math.min(quantity, Math.max(0, item.stock - (existing?.quantity ?? 0)));
+        if (accepted <= 0) return 0;
+
         setItems((current) => {
-          const existing = current.find((entry) => entry.id === item.id);
-          if (existing) {
+          const currentExisting = current.find((entry) => entry.id === item.id);
+          const currentAccepted = Math.min(
+            quantity,
+            Math.max(0, item.stock - (currentExisting?.quantity ?? 0)),
+          );
+          if (currentAccepted <= 0) return current;
+          if (currentExisting) {
             return current.map((entry) =>
-              entry.id === item.id ? { ...entry, quantity: entry.quantity + quantity } : entry,
+              entry.id === item.id
+                ? { ...entry, ...item, quantity: entry.quantity + currentAccepted }
+                : entry,
             );
           }
-          return [...current, { ...item, quantity }];
-        }),
+          return [...current, { ...item, quantity: currentAccepted }];
+        });
+        return accepted;
+      },
       setQuantity: (id, quantity) =>
         setItems((current) =>
           quantity <= 0
             ? current.filter((entry) => entry.id !== id)
-            : current.map((entry) => (entry.id === id ? { ...entry, quantity } : entry)),
+            : current.flatMap((entry) => {
+                if (entry.id !== id) return [entry];
+                if (entry.stock <= 0) return [];
+                return [{ ...entry, quantity: Math.min(quantity, entry.stock) }];
+              }),
         ),
       remove: (id) => setItems((current) => current.filter((entry) => entry.id !== id)),
       clear: () => setItems([]),

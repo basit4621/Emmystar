@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ShoppingBag } from "lucide-react";
+import { MessageCircle, ShoppingBag } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { CartDrawer } from "@/components/store/CartDrawer";
@@ -21,9 +21,9 @@ export function SiteChrome({ settings, children }: { settings: Settings; childre
     <div className="flex min-h-screen flex-col bg-background">
       <header className="sticky top-0 z-30 border-b border-border bg-card">
         <div className="mx-auto flex h-16 w-full max-w-6xl items-center gap-6 px-4">
-          <Link to="/" search={{ category: undefined }} className="flex items-center gap-2">
-            <StarLogo className="h-6 w-6 text-accent" />
-            <span className="font-display text-lg font-bold">{settings.store_name}</span>
+          <Link to="/" search={{ category: undefined }} className="flex min-w-0 items-center gap-2">
+            <StarLogo className="h-6 w-6 shrink-0 text-accent" />
+            <span className="truncate font-display text-lg font-bold">{settings.store_name}</span>
           </Link>
 
           <nav className="ml-auto hidden items-center gap-6 md:flex">
@@ -43,7 +43,7 @@ export function SiteChrome({ settings, children }: { settings: Settings; childre
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="ml-auto flex items-center gap-2 rounded-lg border border-primary px-3 py-2 text-sm font-semibold text-primary md:ml-0"
+            className="ml-auto flex shrink-0 items-center gap-2 rounded-lg border border-primary px-3 py-2 text-sm font-semibold text-primary md:ml-0"
           >
             <ShoppingBag className="h-4 w-4" />
             <span className="hidden sm:inline">Order list</span>
@@ -79,16 +79,19 @@ export function SiteChrome({ settings, children }: { settings: Settings; childre
             </div>
             <p className="mt-2 max-w-sm text-sm opacity-80">{settings.tagline}</p>
           </div>
-          <a
-            href={`https://wa.me/${settings.whatsapp_number}`}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex w-fit rounded-lg bg-success px-4 py-2 text-sm font-semibold text-success-foreground"
-          >
-            Chat on WhatsApp
-          </a>
         </div>
       </footer>
+
+      <a
+        href={`https://wa.me/${settings.whatsapp_number}`}
+        target="_blank"
+        rel="noreferrer"
+        aria-label="Chat with Emmy Star on WhatsApp"
+        title="Chat on WhatsApp"
+        className="fixed bottom-5 right-5 z-30 inline-flex size-14 items-center justify-center rounded-full bg-success text-success-foreground shadow-lg transition-transform hover:scale-105 hover:bg-success/90 focus-visible:outline-offset-4"
+      >
+        <MessageCircle className="size-7" aria-hidden="true" />
+      </a>
 
       <CartDrawer settings={settings} />
     </div>

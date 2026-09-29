@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      orders: {
+        Row: {
+          created_at: string
+          currency_symbol: string
+          customer_name: string
+          customer_phone: string
+          id: string
+          items: Json
+          status: string
+          total: number
+        }
+        Insert: {
+          created_at?: string
+          currency_symbol?: string
+          customer_name: string
+          customer_phone: string
+          id?: string
+          items: Json
+          status?: string
+          total: number
+        }
+        Update: {
+          created_at?: string
+          currency_symbol?: string
+          customer_name?: string
+          customer_phone?: string
+          id?: string
+          items?: Json
+          status?: string
+          total?: number
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           category: string

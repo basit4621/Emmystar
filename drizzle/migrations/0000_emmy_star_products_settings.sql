@@ -24,7 +24,7 @@ CREATE TABLE public.settings (
   id integer PRIMARY KEY DEFAULT 1,
   store_name text NOT NULL DEFAULT 'Emmy Star',
   tagline text NOT NULL DEFAULT 'Tested and verified gadgets in Nigeria',
-  whatsapp_number text NOT NULL DEFAULT '2348012345678',
+  whatsapp_number text NOT NULL DEFAULT '2348108361022',
   currency_symbol text NOT NULL DEFAULT '₦',
   updated_at timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT settings_singleton CHECK (id = 1)

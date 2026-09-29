@@ -15,6 +15,27 @@
       "when": 1790594824344,
       "tag": "0001_product_images_storage_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790600400000,
+      "tag": "0002_owner_only_admin_policies",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790604000000,
+      "tag": "0003_order_history",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790607600000,
+      "tag": "0004_owner_order_delete",
+      "breakpoints": true
     }
   ]
 }

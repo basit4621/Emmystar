@@ -1,15 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { MessageCircle, ShieldCheck, Timer } from "lucide-react";
-import { useMemo, useState } from "react";
+import { ArrowLeft, ArrowRight, MessageCircle, ShieldCheck, Timer } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 import { ProductCard } from "@/components/store/ProductCard";
 import { SiteChrome } from "@/components/store/SiteChrome";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  type CarouselApi,
+} from "@/components/ui/carousel";
 import { Skeleton } from "@/components/ui/skeleton";
-import { productsQuery, settingsQuery } from "@/lib/store";
+import { DEFAULT_WHATSAPP_NUMBER, productsQuery, settingsQuery } from "@/lib/store";
 
-import heroDevices from "@/assets/hero-devices.png";
-import catIphones from "@/assets/cat-iphones.jpg";
+import catIphones from "@/assets/iphone-product-photo.jpg";
 import catSamsung from "@/assets/cat-samsung.jpg";
 import catLaptops from "@/assets/cat-laptops.jpg";
 import trustStore from "@/assets/trust-store.jpg";
@@ -44,6 +49,12 @@ const CATEGORY_CARDS = [
   { name: "Laptops", image: catLaptops, blurb: "Work and school ready" },
 ];
 
+const HERO_SLIDES = [
+  { name: "iPhones", image: catIphones, alt: "A collection of verified iPhones" },
+  { name: "Samsung", image: catSamsung, alt: "A collection of Samsung smartphones" },
+  { name: "Laptops", image: catLaptops, alt: "Laptops ready for work and school" },
+];
+
 const TRUST_ITEMS = [
   { icon: ShieldCheck, title: "Checked before sale", body: "Battery, camera, ports and screen tested on every device." },
   { icon: MessageCircle, title: "Order on WhatsApp", body: "Send your list and confirm with a real person, not a robot." },
@@ -54,6 +65,20 @@ function Home() {
   const { category } = Route.useSearch();
   const navigate = Route.useNavigate();
   const [search, setSearch] = useState("");
+  const [heroApi, setHeroApi] = useState<CarouselApi>();
+  const [heroIndex, setHeroIndex] = useState(0);
+
+  useEffect(() => {
+    if (!heroApi) return;
+
+    const updateHeroIndex = () => setHeroIndex(heroApi.selectedScrollSnap());
+    updateHeroIndex();
+    heroApi.on("select", updateHeroIndex);
+
+    return () => {
+      heroApi.off("select", updateHeroIndex);
+    };
+  }, [heroApi]);
 
   const settings = useQuery(settingsQuery);
   const products = useQuery(productsQuery);
@@ -81,48 +106,95 @@ function Home() {
     id: 1,
     store_name: "Emmy Star",
     tagline: "Tested and verified gadgets",
-    whatsapp_number: "2348012345678",
+    whatsapp_number: DEFAULT_WHATSAPP_NUMBER,
     currency_symbol: "₦",
   };
 
   return (
     <SiteChrome settings={storeSettings}>
       <section className="bg-primary text-primary-foreground">
-        <div className="mx-auto grid w-full max-w-6xl items-center gap-10 px-4 py-14 md:grid-cols-2 md:py-20">
-          <div>
-            <h1 className="font-display text-4xl font-bold leading-tight md:text-5xl">
-              Buy gadgets with confidence.
-            </h1>
-            <p className="mt-4 max-w-md text-base opacity-85">
-              Every iPhone, Samsung, and laptop at {storeSettings.store_name} is tested and verified
-              before sale. Add to your order and confirm on WhatsApp.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <a
-                href="#shop"
-                className="rounded-lg bg-accent px-5 py-3 text-sm font-semibold text-accent-foreground"
-              >
-                Browse the shop
-              </a>
-              <a
-                href={`https://wa.me/${storeSettings.whatsapp_number}`}
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-lg border border-primary-foreground px-5 py-3 text-sm font-semibold text-primary-foreground"
-              >
-                Chat on WhatsApp
-              </a>
-            </div>
-          </div>
-          <div className="flex justify-center">
-            <img
-              src={heroDevices}
-              alt="Line drawing of a phone and a laptop"
-              width={512}
-              height={512}
-              className="w-full max-w-sm"
-            />
-          </div>
+        <div className="mx-auto w-full max-w-6xl px-4 py-8 md:py-12">
+          <Carousel opts={{ loop: true }} setApi={setHeroApi}>
+            <CarouselContent className="ml-0">
+              {HERO_SLIDES.map((slide) => (
+                <CarouselItem key={slide.name} className="pl-0">
+                  <article className="grid min-h-[500px] overflow-hidden rounded-lg bg-primary md:min-h-[440px] md:grid-cols-2">
+                    <div className="relative min-h-[250px] md:min-h-[440px]">
+                      <img
+                        src={slide.image}
+                        alt={slide.alt}
+                        width={1200}
+                        height={900}
+                        className="absolute inset-0 h-full w-full object-cover"
+                      />
+                      <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 bg-primary/90 px-4 py-3 text-primary-foreground md:px-6">
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-widest text-accent">
+                            Explore the collection
+                          </p>
+                          <p className="mt-1 font-display text-xl font-semibold">{slide.name}</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => heroApi?.scrollPrev()}
+                            aria-label="Previous featured category"
+                            className="inline-flex size-10 items-center justify-center rounded-md bg-card text-primary transition-colors hover:bg-accent"
+                          >
+                            <ArrowLeft className="size-4" aria-hidden="true" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => heroApi?.scrollNext()}
+                            aria-label="Next featured category"
+                            className="inline-flex size-10 items-center justify-center rounded-md bg-card text-primary transition-colors hover:bg-accent"
+                          >
+                            <ArrowRight className="size-4" aria-hidden="true" />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="absolute right-4 top-4 flex gap-1.5 md:right-6 md:top-6">
+                        {HERO_SLIDES.map((dot, index) => (
+                          <button
+                            key={dot.name}
+                            type="button"
+                            onClick={() => heroApi?.scrollTo(index)}
+                            aria-label={`Show ${dot.name}`}
+                            aria-current={heroIndex === index ? "true" : undefined}
+                            className={`h-1.5 rounded-full transition-all ${
+                              heroIndex === index ? "w-8 bg-accent" : "w-3 bg-card/80"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col justify-center px-6 py-8 sm:px-10 md:px-12 md:py-12">
+                      <p className="mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-accent">
+                        <ShieldCheck className="size-4" aria-hidden="true" />
+                        Tested and verified in Nigeria
+                      </p>
+                      <h1 className="max-w-md font-display text-4xl font-bold leading-tight md:text-5xl">
+                        Buy gadgets with confidence.
+                      </h1>
+                      <p className="mt-4 max-w-md text-base leading-relaxed opacity-85">
+                        Every iPhone, Samsung, and laptop at {storeSettings.store_name} is tested
+                        before sale. Build your order and confirm it directly on WhatsApp.
+                      </p>
+                      <div className="mt-7 flex flex-wrap gap-3">
+                        <a
+                          href="#shop"
+                          className="rounded-md bg-accent px-5 py-3 text-sm font-semibold text-accent-foreground transition-colors hover:bg-accent/90"
+                        >
+                          Browse the shop
+                        </a>
+                      </div>
+                    </div>
+                  </article>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
         </div>
       </section>
 
@@ -194,7 +266,7 @@ function Home() {
           </div>
         </div>
 
-        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
           {products.isLoading &&
             Array.from({ length: 4 }).map((_, index) => (
               <div key={index} className="rounded-lg border border-border bg-card p-4">

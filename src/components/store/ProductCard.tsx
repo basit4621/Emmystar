@@ -2,11 +2,12 @@ import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 
 import { useCart } from "@/hooks/useCart";
-import { formatPrice, type Product } from "@/lib/store";
+import { formatPrice, getProductImage, type Product } from "@/lib/store";
 
 export function ProductCard({ product, symbol }: { product: Product; symbol: string }) {
   const { add } = useCart();
   const soldOut = product.stock <= 0;
+  const productImage = getProductImage(product);
 
   return (
     <article className="flex flex-col overflow-hidden rounded-lg border border-border bg-card">
@@ -15,21 +16,15 @@ export function ProductCard({ product, symbol }: { product: Product; symbol: str
         params={{ id: product.id }}
         className="block aspect-square overflow-hidden bg-background"
       >
-        {product.image_url ? (
-          <img
-            src={product.image_url}
-            alt={product.name}
-            loading="lazy"
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">
-            No photo yet
-          </div>
-        )}
+        <img
+          src={productImage.src}
+          alt={productImage.isFallback ? `${product.category} collection` : product.name}
+          loading="lazy"
+          className="h-full w-full object-cover"
+        />
       </Link>
 
-      <div className="flex flex-1 flex-col gap-2 p-4">
+      <div className="flex min-w-0 flex-1 flex-col gap-2 p-3 sm:p-4">
         <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           {product.category}
         </span>
@@ -42,8 +37,8 @@ export function ProductCard({ product, symbol }: { product: Product; symbol: str
         </Link>
         <p className="line-clamp-2 text-sm text-muted-foreground">{product.description}</p>
 
-        <div className="mt-auto flex items-center justify-between gap-3 pt-2">
-          <span className="font-display text-lg font-bold text-foreground">
+        <div className="mt-auto flex flex-col items-start gap-2 pt-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+          <span className="font-display text-base font-bold text-foreground sm:text-lg">
             {formatPrice(product.price, symbol)}
           </span>
           {soldOut ? (
@@ -65,13 +60,16 @@ export function ProductCard({ product, symbol }: { product: Product; symbol: str
           type="button"
           disabled={soldOut}
           onClick={() => {
-            add({
+            const accepted = add({
               id: product.id,
               name: product.name,
               price: product.price,
-              image_url: product.image_url,
+              image_url: productImage.src,
+              stock: product.stock,
             });
-            toast.success(`${product.name} added to your order list`);
+            if (accepted > 0) {
+              toast.success(`${product.name} added to your order list`);
+            } else toast.error("Your order list already has all available stock");
           }}
           className="mt-3 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:border disabled:border-border disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100"
         >

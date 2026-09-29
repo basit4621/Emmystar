@@ -6,7 +6,13 @@ import { toast } from "sonner";
 import { SiteChrome } from "@/components/store/SiteChrome";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCart } from "@/hooks/useCart";
-import { formatPrice, productsQuery, settingsQuery } from "@/lib/store";
+import {
+  DEFAULT_WHATSAPP_NUMBER,
+  formatPrice,
+  getProductImage,
+  productsQuery,
+  settingsQuery,
+} from "@/lib/store";
 
 export const Route = createFileRoute("/product/$id")({
   head: () => ({
@@ -34,12 +40,13 @@ function ProductDetail() {
   const settings = useQuery(settingsQuery);
   const products = useQuery(productsQuery);
   const product = products.data?.find((entry) => entry.id === id);
+  const productImage = product ? getProductImage(product) : null;
 
   const storeSettings = settings.data ?? {
     id: 1,
     store_name: "Emmy Star",
     tagline: "Tested and verified gadgets",
-    whatsapp_number: "2348012345678",
+    whatsapp_number: DEFAULT_WHATSAPP_NUMBER,
     currency_symbol: "₦",
   };
 
@@ -70,10 +77,10 @@ function ProductDetail() {
         {product && (
           <div className="mt-6 grid gap-10 md:grid-cols-2">
             <div className="overflow-hidden rounded-lg border border-border bg-card">
-              {product.image_url ? (
+              {productImage ? (
                 <img
-                  src={product.image_url}
-                  alt={product.name}
+                  src={productImage.src}
+                  alt={productImage.isFallback ? `${product.category} collection` : product.name}
                   className="aspect-square w-full object-cover"
                 />
               ) : (
@@ -122,7 +129,8 @@ function ProductDetail() {
                   <button
                     type="button"
                     aria-label="Increase quantity"
-                    onClick={() => setQuantity((value) => value + 1)}
+                    disabled={quantity >= product.stock}
+                    onClick={() => setQuantity((value) => Math.min(product.stock, value + 1))}
                     className="px-4 py-2"
                   >
                     +
@@ -133,16 +141,23 @@ function ProductDetail() {
                   type="button"
                   disabled={product.stock <= 0}
                   onClick={() => {
-                    add(
+                    const accepted = add(
                       {
                         id: product.id,
                         name: product.name,
                         price: product.price,
-                        image_url: product.image_url,
+                        image_url: productImage?.src ?? null,
+                        stock: product.stock,
                       },
                       quantity,
                     );
-                    toast.success(`${product.name} added to your order list`);
+                    if (accepted === quantity) {
+                      toast.success(`${product.name} added to your order list`);
+                    } else if (accepted > 0) {
+                      toast.error(`Only ${accepted} more available; added that amount`);
+                    } else {
+                      toast.error("Your order list already has all available stock");
+                    }
                   }}
                   className="rounded-lg bg-accent px-5 py-3 text-sm font-semibold text-accent-foreground disabled:border disabled:border-border disabled:bg-muted disabled:text-muted-foreground"
                 >
